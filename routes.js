@@ -1,6 +1,9 @@
-const express = require("express");
+const express = require('express');
+
+const router = express.Router()
+
 const db = require("./data/db")
-const router = express.Router(); //creates new router
+//to convert text to json
 
 router.post("/", (req, res) => {
     const post = req.body
@@ -20,12 +23,13 @@ router.post("/", (req, res) => {
 
 router.post("/:id/comments", (req, res) => {
     const comment = req.body
+    comment.post_id = Number(req.params.id)
     if (!comment.text) {
         res.status(400).json({ errorMessage: "Please provide text for the comment." })
     } else {
-        db.findById(req.params.id)
+        db.findById(Number(req.params.id))
         .then(result => {
-            if (!result === 0) {
+            if (result !== 0) {
                 db.insertComment(comment)
                 .then(commentResult => {
                     comment.id = commentResult.id
@@ -55,9 +59,9 @@ router.get("/", (req, res) => {
 });
 
 router.get("/:id", (req, res) => {
-    db.findById(req.params.id)
+    db.findById(Number(req.params.id))
     .then(result => {
-        if (!result.length === 0) {
+        if (result.length !== 0) {
             res.status(200).json(result)
         } else {
             res.status(404).json({ message: "The post with the specified ID does not exist." })
@@ -69,9 +73,9 @@ router.get("/:id", (req, res) => {
 });
 
 router.get("/:id/comments", (req, res) => {
-    db.findById(req.params.id)
+    db.findById(Number(req.params.id))
     .then(result => {
-        if (!result.length === 0) {
+        if (result.length !== 0) {
           db.findPostComments(req.params.id)
           .then(commentResult => {
               res.status(200).json(commentResult)
@@ -89,9 +93,9 @@ router.get("/:id/comments", (req, res) => {
 });
 
 router.delete("/:id", (req, res) => {
-    db.findById(req.params.id)
+    db.findById(Number(req.params.id))
     .then(result => {
-        if (!result.length === 0) {
+        if (result.length !== 0) {
          db.remove(req.params.id)
          .then(deleteResult => {
              res.status(204).send()
@@ -111,9 +115,9 @@ router.delete("/:id", (req, res) => {
 
 router.put("/:id", (req, res) => {
     const post = req.body
-    db.findById(req.params.id)
+    db.findById(Number(req.params.id))
     .then(result => {
-        if (!result.length === 0) {
+        if (result.length !== 0) {
             if(!post.title || !post.contents) {
                 res.status(400).json({ errorMessage: "Please provide title and contents for the post."})
             } else {
